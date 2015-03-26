@@ -1,0 +1,14 @@
+﻿{
+	"version": "1.0.0-beta3",
+	"dependencies": {
+		"Microsoft.Framework.Runtime": "1.0.0-beta3",
+		"Microsoft.AspNet.Server.IIS": "1.0.0-beta3",
+
+		"mongocsharpdriver": "1.10.0"
+	},
+
+    "frameworks" : {
+        "aspnet50" : { 
+        }
+    }
+}
