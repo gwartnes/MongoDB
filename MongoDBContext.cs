@@ -1,12 +1,13 @@
-﻿using MongoDB.Driver;
+﻿using MausWorks.MongoDB.Exceptions;
+using MongoDB.Driver;
 using System;
 
 namespace MausWorks.MongoDB
 {
-    public abstract class MongoDBContext
-    {
+	public abstract class MongoDBContext
+	{
 		protected MongoServer MongoServer { get; set; }
-		private MongoClient MongoClient { get; set; }
+		protected MongoClient MongoClient { get; set; }
 		protected MongoDatabase Database { get; private set; }
 
 		private MongoDBContextParameters _contextParams;
@@ -15,25 +16,36 @@ namespace MausWorks.MongoDB
 		{
 			var svc = GetMongoDBService(provider);
 
-			var ctx = new TContext();
+			MongoDBContextParameters ctxParams;
 
-			ctx._contextParams = svc.Contexts[typeof(TContext).Name];
+			if (svc.Contexts.TryGetValue(typeof(TContext).Name, out ctxParams))
+			{
+				var ctx = new TContext();
 
-			ctx.MongoClient = new MongoClient(ctx._contextParams.ConnectionString);
-			ctx.MongoServer = ctx.MongoClient.GetServer();
+				ctx._contextParams = svc.Contexts[typeof(TContext).Name];
 
-			ctx.Database = ctx.MongoServer.GetDatabase(ctx._contextParams.DatabaseName);
+				ctx.MongoClient = new MongoClient(ctx._contextParams.ConnectionString);
+				ctx.MongoServer = ctx.MongoClient.GetServer();
 
-			ctx.SetUpEntities();
+				ctx.Database = ctx.MongoServer.GetDatabase(ctx._contextParams.DatabaseName);
 
-			return ctx;
+				ctx.SetUpEntities();
+
+				return ctx;
+			}
+
+			throw new ContextCreationException
+			(
+				typeof(TContext),
+				innerException: new NullReferenceException("The configuration did not contain configuration-settings for the provided context.")
+			);
 		}
 
 		public abstract void SetUpEntities();
 
 		private static MongoDBService GetMongoDBService(IServiceProvider provider)
 		{
-			return (MongoDBService)provider.GetService(typeof (MongoDBService));
+			return (MongoDBService)provider.GetService(typeof(MongoDBService));
 		}
-    }
+	}
 }
