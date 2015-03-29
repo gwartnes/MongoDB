@@ -19,7 +19,7 @@ namespace MausWorks.MongoDB
                 return;
             }
 
-
+            PropertyValues = GetPropertyValues(modelType, model);
         }
 
         public bool Validates()
