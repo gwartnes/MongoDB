@@ -5,10 +5,11 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using MongoDB.Driver.Builders;
 
 namespace MausWorks.MongoDB
 {
-    public class EntitySet<T> : IQueryable<T> where T : class, new()
+    public class EntitySet<T> : IQueryable<T> where T : class
     {
 		private Lazy<MongoCollection<T>> _collection;
 
@@ -19,9 +20,28 @@ namespace MausWorks.MongoDB
 			_collection = new Lazy<MongoCollection<T>>(() => db.GetCollection<T>(collectionName));
 		}
 
-		#region -- IQueryable<T> wrapper functions --
+        #region -- More wrapper functions --
 
-		private IQueryable<T> _queryableCollection;
+        public int InsertMany(IEnumerable<T> documents)
+        {
+            return Collection.InsertBatch(documents).Count(cn => cn.Ok);
+        }
+
+        public bool Insert(T document)
+        {
+            return Collection.Insert(document).Ok;
+        }
+
+        public bool Delete(IMongoQuery query)
+        {
+            return Collection.Remove(query).Ok;
+        }
+
+        #endregion
+
+        #region -- IQueryable<T> wrapper functions --
+
+        private IQueryable<T> _queryableCollection;
 		private IQueryable<T> QueryableCollection
 		{
 			get
