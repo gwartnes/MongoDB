@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MausWorks.MongoDB.Extensions;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace MausWorks.MongoDB
 {
     public class MongoEntityValidator
     {
-        public IEnumerable<KeyValuePair<string, object>> PropertyValues { get; private set; }
+        public IEnumerable<KeyValuePair<string, object>> RequiredProperties { get; private set; }
 
         public MongoEntityValidator(object model)
         {
@@ -19,23 +20,31 @@ namespace MausWorks.MongoDB
                 return;
             }
 
-
+            RequiredProperties = GetPropertyValues(modelType, model);
         }
 
         public bool Validates()
         {
-            return !PropertyValues.Any(pvs => IsDefaultOrNull(pvs.Value));
+            return !RequiredProperties.Any(pvs => IsDefaultOrNull(pvs.Value));
+        }
+
+        public IEnumerable<string> GetInvalidPropertyNames()
+        {
+            return RequiredProperties.Where(kvp => IsDefaultOrNull(kvp.Value)).Select(k => k.Key); 
         }
 
         public bool IsDefaultOrNull(object obj)
         {
+            if (obj == null)
+            {
+                return true;
+            }
             var t = obj.GetType();
 
             if (t.IsValueType)
             {
-                return true; // <-- Here.
+                return obj == t.GetDefaultValue();
             }
-
 
             return obj == null;
         }

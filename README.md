@@ -3,7 +3,7 @@
 A "Entity Framework-esque" service for MongoDB for usage in ASP.NET 5.
 
 #Example usage:
-An example can be found
+An example can be found in MausSite
 
 ##Startup.cs
     public void ConfigureServices(IServiceCollection services)
