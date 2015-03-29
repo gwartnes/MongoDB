@@ -20,7 +20,11 @@ namespace MausWorks.MongoDB
                 return;
             }
 
+<<<<<<< HEAD
             RequiredProperties = GetPropertyValues(modelType, model);
+=======
+            PropertyValues = GetPropertyValues(modelType, model);
+>>>>>>> origin/master
         }
 
         public bool Validates()
