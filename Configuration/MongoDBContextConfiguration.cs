@@ -1,6 +1,4 @@
 ﻿using MongoDB.Driver.Core.Configuration;
-using MausWorks.MongoDB.Annotations;
-using System;
 
 namespace MausWorks.MongoDB.Configuration
 {
@@ -39,7 +37,7 @@ namespace MausWorks.MongoDB.Configuration
         /// <value>
         /// The name.
         /// </value>
-        public string Name { get; set; }
+        internal string Name { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDBContextConfiguration"/> class.
