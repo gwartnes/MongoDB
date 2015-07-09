@@ -1,14 +1,13 @@
-﻿{
-	"version": "1.0.0-beta3",
-	"dependencies": {
-		"Microsoft.Framework.Runtime": "1.0.0-beta3",
-		"Microsoft.AspNet.Server.IIS": "1.0.0-beta3",
+{
+  "version": "1.0.0-beta5",
 
-		"mongocsharpdriver": "1.10.0"
-	},
+  "dependencies": {
+    "mongocsharpdriver": "2.0.1",
+    "Microsoft.AspNet.Mvc": "6.0.0-beta5",
+    "Microsoft.Framework.OptionsModel": "1.0.0-beta5"
+  },
 
-    "frameworks" : {
-        "aspnet50" : { 
-        }
-    }
+  "frameworks": {
+    "dnx451": { }
+  }
 }
