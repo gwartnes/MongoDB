@@ -3,8 +3,11 @@ using MongoDB.Driver.Core.Configuration;
 
 namespace MausWorks.MongoDB.Configuration
 {
-	public class MongoDBContextConfiguration
-	{
+    /// <summary>
+    /// Configuration class for <see cref="MongoDBContext"/>s
+    /// </summary>
+    public class MongoDBContextConfiguration
+    {
         /// <summary>
         /// Gets or sets the mongo client settings.
         /// </summary>

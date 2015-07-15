@@ -2,10 +2,26 @@
 
 namespace MausWorks.MongoDB
 {
+    /// <summary>
+    /// Provides templating for future <see cref="MongoDBContext"/>s
+    /// </summary>
     public abstract class MongoDBContext
-	{
+    {
+        /// <summary>
+        /// Gets or sets the mongo client.
+        /// </summary>
+        /// <value>
+        /// The mongo client.
+        /// </value>
         internal IMongoClient MongoClient { get; set; }
-		internal IMongoDatabase Database { get; set; }
+
+        /// <summary>
+        /// Gets or sets the database.
+        /// </summary>
+        /// <value>
+        /// The database.
+        /// </value>
+        internal IMongoDatabase Database { get; set; }
 
         /// <summary>
         /// Creates the a <see cref="IMongoCollection{TDocument}"/> and maps it to the connected database.

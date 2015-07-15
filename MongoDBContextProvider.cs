@@ -9,9 +9,18 @@ using System.Linq;
 
 namespace MausWorks.MongoDB
 {
+    /// <summary>
+    /// A provider used for creating a <see cref="MongoDBContext"/>
+    /// </summary>
     internal class MongoDBContextProvider
     {
-        private string ContextName { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the context.
+        /// </summary>
+        /// <value>
+        /// The name of the context.
+        /// </value>
+        private string _contextName { get; set; }
 
         /// <summary>
         /// Gets the configuration.
@@ -29,12 +38,12 @@ namespace MausWorks.MongoDB
         /// <param name="configure">The <see cref="ConfigureOptions{TOptions}"/> as provided by the <see cref="Microsoft.Framework.OptionsModel"/>.</param>
         /// <returns></returns>
         internal TContext CreateContext<TContext>(
-                    IOptions<MongoDBContextConfiguration<TContext>> options,
-                    IConfigureOptions<MongoDBContextConfiguration<TContext>> configure)
+            IOptions<MongoDBContextConfiguration<TContext>> options,
+            IConfigureOptions<MongoDBContextConfiguration<TContext>> configure)
 
-                    where TContext : MongoDBContext, new()
+            where TContext : MongoDBContext, new()
         {
-            ContextName = typeof(TContext).Name;
+            _contextName = typeof(TContext).Name;
 
             MongoDBContextConfiguration config;
 
@@ -71,8 +80,8 @@ namespace MausWorks.MongoDB
                 return ctx;
             }
 
-            string message = String.Format("A valid configuration for the context '{0}' was not provided.\r\nErrors:\r\n {1}", 
-                ContextName, 
+            string message = String.Format("A valid configuration for the context '{0}' was not provided.\r\nErrors:\r\n {1}",
+                _contextName,
                 String.Join("\r\n", errors.Select(e => e.Message)));
 
             throw new ContextCreationException(message);
@@ -110,9 +119,12 @@ namespace MausWorks.MongoDB
             return client.GetDatabase(Configuration.DatabaseName, Configuration.DatabaseSettings);
         }
 
-        private static readonly ImmutableArray<Func<MongoDBContextConfiguration, MongoDBConfigurationNotice>> _validationConstraints = 
+        #region -- Validation Constraints --
+
+        private static readonly ImmutableArray<Func<MongoDBContextConfiguration, MongoDBConfigurationNotice>> _validationConstraints =
             ImmutableArray.Create<Func<MongoDBContextConfiguration, MongoDBConfigurationNotice>>(
-            ((config) => {
+            ((config) =>
+            {
                 // Validate whether a connection-string or client settings has been provided by the configuration.
                 if ((config.ConnectionString != null) ||
                 (
@@ -122,10 +134,14 @@ namespace MausWorks.MongoDB
                 {
                     return MongoDBConfigurationNotice.Valid;
                 }
-                return new MongoDBConfigurationNotice(true, String.Format("A valid '{0}' (or '{1}') has not been provided.", nameof(config.ConnectionString), nameof(config.ClientSettings)));
+                return new MongoDBConfigurationNotice(true, String.Format("A valid '{0}' (or '{1}') has not been provided.",
+                    nameof(config.ConnectionString),
+                    nameof(config.ClientSettings))
+                );
             }),
-            
-            ((config) => {
+
+            ((config) =>
+            {
                 return // Make sure that a database name has been provided by the configuration 
                     config.DatabaseName != null
                         ? MongoDBConfigurationNotice.Valid
@@ -133,11 +149,23 @@ namespace MausWorks.MongoDB
             })
         );
 
+        #endregion
+
+        /// <summary>
+        /// Determines whether the provided configuration can create a valid <see cref="MongoDBContext"/>.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <returns></returns>
         internal static bool IsConfigValid(MongoDBContextConfiguration config)
         {
             return !_validationConstraints.Any(c => c(config).IsError);
         }
 
+        /// <summary>
+        /// Gets configuration errors spawned by bad (or nonexistent) configuration.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <returns></returns>
         internal static IEnumerable<MongoDBConfigurationNotice> GetConfigurationErrors(MongoDBContextConfiguration config)
         {
             return _validationConstraints.Select(c => c(config)).Where(c => c.IsError);
