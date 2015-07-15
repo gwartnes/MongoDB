@@ -7,19 +7,36 @@ A "Entity Framework-esque" service for MongoDB for usage in ASP.NET 5.
 ##Startup.cs
     public void ConfigureServices(IServiceCollection services)
     {
+		// No service for "MongoDB" has to be added or configured,
+		// only configuration for the contexts.
         services
-        	.AddMvc(Configuration)
         	.AddMongoDBContext<SomeContext>(Configuration.GetConfigurationSection("MongoDB:SomeContext"));
         
-        // alternatively
+        // alternatively:
         services.AddMongoDBContext<SomeContext>(o =>
 		{
 			o.ConnectionString = "mongodb://usr:passw@mongoserver.tld:1337/database-name";
 			o.DatabaseName = "database-name"; //or null if part of the connection-string
 		});
+
+		// Further configuration can be used as such:
+        services.ConfigureMongoDBContext<SomeContext>(o =>
+        {
+            o.ClientSettings = new MongoClientSettings
+            {
+                UseSsl = true,
+                WriteConcern = WriteConcern.WMajority,
+                ConnectionMode = ConnectionMode.Standalone
+            };
+            o.DatabaseSettings = new MongoDatabaseSettings
+            {
+                ReadPreference = ReadPreference.PrimaryPreferred,
+                WriteConcern = new WriteConcern(1)
+            };
+        });
     }
     
-##SomeContext
+##SomeContext.cs
     public class SomeContext : MongoDBContext
     {
         public IMongoCollection<SomeEntity> SomeEntities { get; set; }
@@ -30,7 +47,7 @@ A "Entity Framework-esque" service for MongoDB for usage in ASP.NET 5.
         }
     }
 	
-##Example configuration
+##Example configuration (config.json)
     {
     	"MongoDB": {
     		"SomeContext": {
