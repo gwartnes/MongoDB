@@ -1,9 +1,26 @@
-﻿using MongoDB.Driver.Core.Configuration;
+﻿using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
 
 namespace MausWorks.MongoDB.Configuration
 {
 	public class MongoDBContextConfiguration
 	{
+        /// <summary>
+        /// Gets or sets the mongo client settings.
+        /// </summary>
+        /// <value>
+        /// The mongo client settings.
+        /// </value>
+        public MongoClientSettings ClientSettings { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets the mongo database settings.
+        /// </summary>
+        /// <value>
+        /// The mongo database settings.
+        /// </value>
+        public MongoDatabaseSettings DatabaseSettings { get; set; } = null;
+
         private ConnectionString _connectionString;
 
         /// <summary>
@@ -32,7 +49,7 @@ namespace MausWorks.MongoDB.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the name of the MongoDBContext.
+        /// Gets or sets the name of the <see cref="MongoDBContextConfiguration"/>.
         /// </summary>
         /// <value>
         /// The name.
