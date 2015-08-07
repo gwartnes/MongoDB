@@ -12,7 +12,7 @@ namespace MausWorks.MongoDB
     /// <summary>
     /// A provider used for creating a <see cref="MongoDBContext"/>
     /// </summary>
-    internal class MongoDBContextProvider
+    internal class MongoDBContextProvider<TContext> where TContext : MongoDBContext, new()
     {
         /// <summary>
         /// Gets or sets the name of the context.
@@ -30,24 +30,12 @@ namespace MausWorks.MongoDB
         /// </value>
         internal MongoDBContextConfiguration Configuration { get; private set; }
 
-        /// <summary>
-        /// Creates a valid <see cref="MongoDBContext"/> given that the provided <see cref="MongoDBContextConfiguration"/> is valid.
-        /// </summary>
-        /// <typeparam name="TContext">The type of the context.</typeparam>
-        /// <param name="options">The options as provided by the <see cref="Microsoft.Framework.OptionsModel"/>.</param>
-        /// <param name="configure">The <see cref="ConfigureOptions{TOptions}"/> as provided by the <see cref="Microsoft.Framework.OptionsModel"/>.</param>
-        /// <returns></returns>
-        internal TContext CreateContext<TContext>(
-            IOptions<MongoDBContextConfiguration<TContext>> options,
-            IConfigureOptions<MongoDBContextConfiguration<TContext>> configure)
 
-            where TContext : MongoDBContext, new()
+        internal MongoDBContextProvider(IOptions<MongoDBContextConfiguration<TContext>> options, IConfigureOptions<MongoDBContextConfiguration<TContext>> configure)
         {
             _contextName = typeof(TContext).Name;
 
             MongoDBContextConfiguration config;
-
-            var ctx = new TContext();
 
             // We need to have a ConfigureOptions-object here, since the interface does not contain the "Action"-property
             // Intentional?
@@ -64,12 +52,24 @@ namespace MausWorks.MongoDB
                 config = options.Options;
             }
 
+            Configuration = config;
+        }
+
+        /// <summary>
+        /// Creates a valid <see cref="MongoDBContext"/> given that the provided <see cref="MongoDBContextConfiguration"/> is valid.
+        /// </summary>
+        /// <typeparam name="TContext">The type of the context.</typeparam>
+        /// <param name="options">The options as provided by the <see cref="Microsoft.Framework.OptionsModel"/>.</param>
+        /// <param name="configure">The <see cref="ConfigureOptions{TOptions}"/> as provided by the <see cref="Microsoft.Framework.OptionsModel"/>.</param>
+        /// <returns></returns>
+        internal TContext CreateContext()
+        {
             // Make sure the configuration is valid.
-            var errors = GetConfigurationErrors(config);
+            var errors = GetConfigurationErrors(Configuration);
 
             if (!errors.Any())
             {
-                Configuration = config;
+                var ctx = new TContext();
 
                 ctx.MongoClient = GetClient();
                 ctx.Database = GetDatabase(ctx.MongoClient);

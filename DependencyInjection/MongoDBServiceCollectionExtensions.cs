@@ -24,14 +24,7 @@ namespace MausWorks.MongoDB.DependencyInjection
         public static IServiceCollection AddMongoDBContext<TContext>(this IServiceCollection services)
             where TContext : MongoDBContext, new()
         {
-            var contextProvider = new MongoDBContextProvider();
-
-            services.AddSingleton(serviceProvider =>
-                contextProvider.CreateContext(
-                    serviceProvider.GetRequiredService<IOptions<MongoDBContextConfiguration<TContext>>>(),
-                    serviceProvider.GetService<IConfigureOptions<MongoDBContextConfiguration<TContext>>>()
-                )
-            );
+            AddContext<TContext>(services);
 
             return services;
         }
@@ -42,25 +35,18 @@ namespace MausWorks.MongoDB.DependencyInjection
         /// <typeparam name="TContext">The type of the context to add</typeparam>
         /// <param name="services">The <see cref="IServiceCollection"/> to add the <see cref="MongoDBContext"/> to</param>
         /// <returns>The provided <see cref="IServiceCollection"/></returns>
-		public static IServiceCollection AddMongoDBContext<TContext>(this IServiceCollection services, Action<MongoDBContextConfiguration<TContext>> contextConfiguration = null, string optionsName = "") 
+		public static IServiceCollection AddMongoDBContext<TContext>(this IServiceCollection services, Action<MongoDBContextConfiguration<TContext>> contextConfiguration = null, string optionsName = "")
             where TContext : MongoDBContext, new()
 		{
             if (contextConfiguration != null)
             {
-                services.ConfigureMongoDBContext(contextConfiguration, optionsName);
+                ConfigureMongoDBContext(services, contextConfiguration, optionsName);
             }
-            
-            var contextProvider = new MongoDBContextProvider();
-            
-            services.AddSingleton(serviceProvider =>
-                contextProvider.CreateContext(
-                    serviceProvider.GetRequiredService<IOptions<MongoDBContextConfiguration<TContext>>>(), 
-                    serviceProvider.GetService<IConfigureOptions<MongoDBContextConfiguration<TContext>>>()
-                )
-            );
+
+            AddContext<TContext>(services);
 
             return services;
-		}
+        }
 
         /// <summary>
         /// Adds a <see cref="MongoDBContext"/> to the provided <see cref="IServiceCollection"/>
@@ -75,17 +61,10 @@ namespace MausWorks.MongoDB.DependencyInjection
         {
             if (configuration != null)
             {
-                services.ConfigureMongoDBContext<TContext>(configuration, optionsName);
+                ConfigureMongoDBContext<TContext>(services, configuration, optionsName);
             }
 
-            var contextProvider = new MongoDBContextProvider();
-
-            services.AddSingleton(serviceProvider =>
-                contextProvider.CreateContext(
-                    serviceProvider.GetRequiredService<IOptions<MongoDBContextConfiguration<TContext>>>(),
-                    serviceProvider.GetService<IConfigureOptions<MongoDBContextConfiguration<TContext>>>()
-                )
-            );
+            AddContext<TContext>(services);
 
             return services;
         }
@@ -98,7 +77,7 @@ namespace MausWorks.MongoDB.DependencyInjection
         /// <param name="configuration">The configuration.</param>
         /// <param name="optionsName">Name of the options.</param>
         /// <returns></returns>
-        public static IServiceCollection ConfigureMongoDBContext<TContext>(this IServiceCollection services, Action<MongoDBContextConfiguration<TContext>> configuration, string optionsName = "")
+        public static IServiceCollection ConfigureMongoDBContext<TContext>(this IServiceCollection services,  Action<MongoDBContextConfiguration<TContext>> configuration, string optionsName = "")
             where TContext : MongoDBContext, new()
         {
             services.Configure(configuration, optionsName);
@@ -121,5 +100,19 @@ namespace MausWorks.MongoDB.DependencyInjection
 
             return services;
         }
+
+        private static void AddContext<TContext>(IServiceCollection services)
+            where TContext : MongoDBContext, new()
+        {
+            services.AddSingleton(serviceProvider =>
+            {
+                var contextProvider = new MongoDBContextProvider<TContext>(
+                    serviceProvider.GetRequiredService<IOptions<MongoDBContextConfiguration<TContext>>>(),
+                    serviceProvider.GetService<IConfigureOptions<MongoDBContextConfiguration<TContext>>>());
+
+                return contextProvider.CreateContext();
+            });
+        }
+
     }
 }
