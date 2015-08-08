@@ -3,6 +3,7 @@ using Microsoft.Framework.DependencyInjection;
 using System;
 using MausWorks.MongoDB.Configuration;
 using Microsoft.Framework.OptionsModel;
+using MausWorks.MongoDB.Builder;
 
 namespace MausWorks.MongoDB.DependencyInjection
 {
@@ -21,12 +22,10 @@ namespace MausWorks.MongoDB.DependencyInjection
         /// <typeparam name="TContext">The type of the context.</typeparam>
         /// <param name="services">The <see cref="IServiceCollection"/> to add the <see cref="MongoDBContext"/> to</param>
         /// <returns></returns>
-        public static IServiceCollection AddMongoDBContext<TContext>(this IServiceCollection services)
+        public static MongoDBContextBuilder<TContext> AddMongoDBContext<TContext>(this IServiceCollection services)
             where TContext : MongoDBContext, new()
         {
-            AddContext<TContext>(services);
-
-            return services;
+            return AddContext<TContext>(services);
         }
 
         /// <summary>
@@ -35,17 +34,15 @@ namespace MausWorks.MongoDB.DependencyInjection
         /// <typeparam name="TContext">The type of the context to add</typeparam>
         /// <param name="services">The <see cref="IServiceCollection"/> to add the <see cref="MongoDBContext"/> to</param>
         /// <returns>The provided <see cref="IServiceCollection"/></returns>
-		public static IServiceCollection AddMongoDBContext<TContext>(this IServiceCollection services, Action<MongoDBContextConfiguration<TContext>> contextConfiguration = null, string optionsName = "")
+		public static MongoDBContextBuilder<TContext> AddMongoDBContext<TContext>(this IServiceCollection services, Action<MongoDBContextConfiguration<TContext>> contextConfiguration = null, string optionsName = "")
             where TContext : MongoDBContext, new()
 		{
             if (contextConfiguration != null)
             {
                 ConfigureMongoDBContext(services, contextConfiguration, optionsName);
             }
-
-            AddContext<TContext>(services);
-
-            return services;
+            
+            return AddContext<TContext>(services);
         }
 
         /// <summary>
@@ -56,17 +53,15 @@ namespace MausWorks.MongoDB.DependencyInjection
         /// <param name="configuration">The configuration.</param>
         /// <param name="optionsName">Name of the options.</param>
         /// <returns></returns>
-        public static IServiceCollection AddMongoDBContext<TContext>(this IServiceCollection services, IConfiguration configuration = null, string optionsName = "")
+        public static MongoDBContextBuilder<TContext> AddMongoDBContext<TContext>(this IServiceCollection services, IConfiguration configuration = null, string optionsName = "")
             where TContext : MongoDBContext, new()
         {
             if (configuration != null)
             {
                 ConfigureMongoDBContext<TContext>(services, configuration, optionsName);
             }
-
-            AddContext<TContext>(services);
-
-            return services;
+            
+            return AddContext<TContext>(services);
         }
 
         /// <summary>
@@ -101,17 +96,12 @@ namespace MausWorks.MongoDB.DependencyInjection
             return services;
         }
 
-        private static void AddContext<TContext>(IServiceCollection services)
+        private static MongoDBContextBuilder<TContext> AddContext<TContext>(IServiceCollection services)
             where TContext : MongoDBContext, new()
         {
-            services.AddSingleton(serviceProvider =>
-            {
-                var contextProvider = new MongoDBContextProvider<TContext>(
-                    serviceProvider.GetRequiredService<IOptions<MongoDBContextConfiguration<TContext>>>(),
-                    serviceProvider.GetService<IConfigureOptions<MongoDBContextConfiguration<TContext>>>());
-
-                return contextProvider.CreateContext();
-            });
+            var builder = new MongoDBContextBuilder<TContext>(services);
+            
+            return builder.Build();
         }
 
     }
