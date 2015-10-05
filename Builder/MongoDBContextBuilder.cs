@@ -7,7 +7,7 @@ namespace MausWorks.MongoDB.Builder
     public partial class MongoDBContextBuilder<TContext>
         where TContext : MongoDBContext, new()
     {
-        private TContext _context;
+        public TContext MongoDBContext { get; set; }
 
         public IServiceCollection Services { get; set; }
 
@@ -16,18 +16,23 @@ namespace MausWorks.MongoDB.Builder
             Services = services;
         }
 
+        /// <summary>
+        /// Builds the <see cref="MongoDBContext"/>
+        /// </summary>
+        /// <returns></returns>
         public MongoDBContextBuilder<TContext> Build()
         {
-            Services.AddSingleton(serviceProvider =>
+            Services.AddScoped(serviceProvider =>
             {
                 var contextProvider = new MongoDBContextProvider<TContext>(
                     serviceProvider.GetRequiredService<IOptions<MongoDBContextConfiguration<TContext>>>(),
                     serviceProvider.GetService<IConfigureOptions<MongoDBContextConfiguration<TContext>>>());
 
                 // This is pretty hacky...
-                _context = contextProvider.CreateContext();
+                // Is setting something from outside the scope of a Func<> considered bad practice?
+                MongoDBContext = contextProvider.CreateContext();
 
-                return _context;
+                return MongoDBContext;
             });
 
             return this;

@@ -29,8 +29,7 @@ namespace MausWorks.MongoDB
         /// The configuration.
         /// </value>
         internal MongoDBContextConfiguration Configuration { get; private set; }
-
-
+        
         internal MongoDBContextProvider(IOptions<MongoDBContextConfiguration<TContext>> options, IConfigureOptions<MongoDBContextConfiguration<TContext>> configure)
         {
             _contextName = typeof(TContext).Name;
@@ -79,12 +78,8 @@ namespace MausWorks.MongoDB
 
                 return ctx;
             }
-
-            string message = String.Format("A valid configuration for the context '{0}' was not provided.\r\nErrors:\r\n {1}",
-                _contextName,
-                String.Join("\r\n", errors.Select(e => e.Message)));
-
-            throw new ContextCreationException(message);
+            
+            throw new ContextCreationException($"A valid configuration for the context '{_contextName}' was not provided.\r\nErrors:\r\n {String.Join("\r\n", errors.Select(e => e.Message))}");
         }
 
         /// <summary>
@@ -134,10 +129,7 @@ namespace MausWorks.MongoDB
                 {
                     return MongoDBConfigurationNotice.Valid;
                 }
-                return new MongoDBConfigurationNotice(true, String.Format("A valid '{0}' (or '{1}') has not been provided.",
-                    nameof(config.ConnectionString),
-                    nameof(config.ClientSettings))
-                );
+                return new MongoDBConfigurationNotice(true, $"A valid '{nameof(config.ConnectionString)}' (or '{nameof(config.ClientSettings)}') has not been provided.");
             }),
 
             ((config) =>

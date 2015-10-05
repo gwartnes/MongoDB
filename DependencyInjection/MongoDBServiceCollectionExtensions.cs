@@ -2,7 +2,6 @@
 using Microsoft.Framework.DependencyInjection;
 using System;
 using MausWorks.MongoDB.Configuration;
-using Microsoft.Framework.OptionsModel;
 using MausWorks.MongoDB.Builder;
 
 namespace MausWorks.MongoDB.DependencyInjection
